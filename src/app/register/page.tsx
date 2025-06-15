@@ -7,38 +7,70 @@ import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const register = api.auth.register.useMutation();
   const router = useRouter();
 
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    await register.mutateAsync(form);
-    await signIn("credentials", {
-      email: form.email,
-      password: form.password,
-      callbackUrl: "/",
-    });
+    setLoading(true);
+
+    try {
+      await register.mutateAsync(form);
+
+      // Sign in хийсний хариуг авна
+      const res = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        callbackUrl: "/",
+        redirect: false, 
+      });
+
+      if (res?.ok) {
+        alert("Амжилттай бүртгэгдлээ!");
+      } else {
+        alert("Нэвтрэхэд алдаа гарлаа.");
+      }
+    } catch (error) {
+      alert(" Имэйл бүртгэлтэй байна.");
+        router.push("/");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-4 max-w-sm mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="mx-auto flex max-w-sm flex-col gap-4 p-8"
+    >
       <input
         placeholder="Нэр"
-        className="border border-gray-300 px-4 py-2 rounded"
+        className="rounded border border-gray-300 px-4 py-2"
         onChange={(e) => setForm({ ...form, name: e.target.value })}
       />
       <input
         placeholder="Email"
-        className="border border-gray-300 px-4 py-2 rounded"
+        className="rounded border border-gray-300 px-4 py-2"
         onChange={(e) => setForm({ ...form, email: e.target.value })}
       />
       <input
         type="password"
-        className="border border-gray-300 px-4 py-2 rounded"
+        className="rounded border border-gray-300 px-4 py-2"
         placeholder="Password"
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />
-      <button className="bg-blue-500 py-2 text-white py-2 rounded">Бүртгүүлэх</button>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className={`rounded bg-blue-500 py-2 text-white ${
+          loading ? "cursor-not-allowed opacity-60" : ""
+        }`}
+      >
+        {loading ? "Бүртгэж байна..." : "Бүртгүүлэх"}
+      </button>
     </form>
   );
 }
