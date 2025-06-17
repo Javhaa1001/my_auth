@@ -71,7 +71,7 @@ export const authConfig = {
         user: {
           ...session.user,
           id: token.sub as string,
-          role: token.role as string, // 👈 энд role-г session-д дамжуулж байна
+          role: token.role as string,
         },
       };
     },
